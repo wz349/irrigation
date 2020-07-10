@@ -1,0 +1,49 @@
+import RPi.GPIO as GPIO
+import time
+import serial
+import paho.mqtt.client as mqtt
+import json
+
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc, *extra_params):
+    print('Connected with result code ' + str(rc))
+    # Subscribing to receive RPC requests
+    client.subscribe('v1/devices/me/rpc/request/+')
+    client.subscribe('v1/devices/me/rpc/response/+')
+    # Sending current irrigation status
+    client.publish('v1/devices/me/attributes', get_irrigation_status(), 1)
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    print 'Topic: ' + msg.topic + '\nMessage: ' + str(msg.payload)
+    # Decode JSON request
+    data = json.loads(msg.payload)
+    # Check request method
+    if data['method'] == 'setValue1':
+        set_irrigation_status(1, data['params'])
+        client.publish(msg.topic.replace('request','response'), get_irrigation_status(), 1)
+        client.publish('v1/devices/me/attributes', get_irrigation_status(), 1)
+        print get_irrigation_status()
+    elif data['method'] == 'setValue2':
+        set_irrigation_status(2, data['params'])
+        client.publish(msg.topic.replace('request','response'), get_irrigation_status(), 1)
+        client.publish('v1/devices/me/attributes', get_irrigation_status(), 1)
+        print get_irrigation_status()
+    elif data['method'] == 'checkStatus':
+        client.publish(msg.topic.replace('request','response'), get_irrigation_status(), 1)
+        client.publish('v1/devices/me/attributes', get_irrigation_status(), 1)
+        print get_irrigation_status()
+    else:
+        print('Unknown method: '+ data['method']) 
+
+# Get current irrigation status as a dictionary
+def get_irrigation_status():
+    return json.dumps(irrigation_state)
+
+def set_irrigation_status(valve, status):
+    irrigation_state["value"+ str(valve)] = status
+    if(valve == 1): GPIO.output(26, status)
+    elif(valve == 2): GPIO.output(16, status)
+
+
