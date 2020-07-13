@@ -186,26 +186,32 @@ toggle = 1
 
 try:
   while(1):
-  	time.sleep(1)
-  	sendAddress(6)
-  	print "ad 6"
-  	time.sleep(1)
-  	sendData(2)
-  	print "cmd 2"
-  	time.sleep(1)
-  	sensor_data['water_stress'] = listen()
-  	time.sleep(1)
-  	sendAddress(6)
-  	print "ad 6"
-  	time.sleep(1)
-  	sendData(3)
-  	print "cmd 3"
-  	time.sleep(1)
-  	sensor_data['temperature'] = listen()
-  	(T,P) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
-  	(payload['temperature'],payload['water_stress']) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress']) 
-	print "temp = ",T,"pressure = ", P
-        client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+	current_sensor = 6
+	while (current_sensor<9):
+	  	time.sleep(1)
+  		sendAddress(current_sensor)
+  		print "ad " , current_sensor
+  		time.sleep(1)
+  		sendData(2)
+  		print "cmd 2"
+  		time.sleep(1)
+  		sensor_data['water_stress'] = listen()
+  		time.sleep(1)
+  		sendAddress(current_sensor)
+	  	print "ad ", current_sensor
+	  	time.sleep(1)
+  		sendData(3)
+  		print "cmd 3"
+  		time.sleep(1)
+  		sensor_data['temperature'] = listen()
+	  	(T,P) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
+  		(payload['temperature'],payload['water_stress']) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress']) 
+		print "temp = ",T,"pressure = ", P
+		if current_sensor == 6 :
+	        	# currently only one sensor available
+			client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+		current_sensor+=1
+
   time.sleep(2)
 #  time.sleep(1)
 #  sendAddress(6)
