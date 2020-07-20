@@ -2,11 +2,11 @@ import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import json
 
-THINGSBOARD_HOST = '192.168.1.117'
+THINGSBOARD_HOST = '67.249.91.222'
 ACCESS_TOKEN = 'RASPBERRY_PI_DEMO_TOKEN'
 
 # We assume that all GPIOs are LOW
-gpio_state = {7: False, 11: False, 12: False, 13: False, 15: False, 16: False, 18: False, 22: False, 29: False,
+gpio_state = {7: False, 11: True, 12: True, 13: True, 15: True, 16: False, 18: False, 22: False, 29: False,
               31: False, 32: False, 33: False, 35: False, 36: False, 37: False, 38: False, 40: False}
 
 
@@ -52,6 +52,10 @@ GPIO.setmode(GPIO.BOARD)
 for pin in gpio_state:
     # Set output mode for all GPIO pins
     GPIO.setup(pin, GPIO.OUT)
+GPIO.output(11,True)
+GPIO.output(12,True)
+GPIO.output(13,True)
+GPIO.output(15,True)
 
 client = mqtt.Client()
 # Register connect callback
