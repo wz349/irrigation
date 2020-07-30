@@ -114,16 +114,24 @@ f = open("input.csv","a+")
 #API_KEY = "9VY9ICR776NZBLM8"
 
 # thingsboard stuff
-THINGSBOARD_HOST = '192.168.1.117'
-ACCESS_TOKEN = 'GtFg0HV2F53PJIYYnJvq'
+THINGSBOARD_HOST = '3.128.34.25'
+ACCESS_TOKEN  = 'H7A7h79eenFkKWApFY4B'
+ACCESS_TOKEN2 = 'U2eO2SUSixY2dLHrWo1q'
 
 sensor_data = {'temperature': 0, 'water_stress': 0}
-payload = {'temperature':0,'water_stress':0}
+payload = {'prtR':0,'brgSig':0}
 client = mqtt.Client()
 client.username_pw_set(ACCESS_TOKEN)
 # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
 client.connect(THINGSBOARD_HOST, 1883, 60)
 client.loop_start()
+
+client2 = mqtt.Client()
+client2.username_pw_set(ACCESS_TOKEN2)
+# Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
+client2.connect(THINGSBOARD_HOST, 1883, 60)
+client2.loop_start()
+
 
 
 
@@ -142,7 +150,7 @@ def adcConversion(refV,prtVal,brgVal):
     print "prtV=",prtV, "brgV=",brgV, "brgRefV=" ,brgRefV, "brgSig=" ,brgSig
 
     # convert voltage to R
-    resRef = 19500
+    resRef = 22000
     prtR = ((float)(resRef*prtV))/(5-prtV)
     print "prtR=" ,prtR
     # coefficients
@@ -170,7 +178,7 @@ def adcConversion(refV,prtVal,brgVal):
     # Calculate P
     P = mp*(brgSig-voT) + bp
 
-    return(T,P)
+    return(prtR,brgSig)
 
 
 
@@ -186,33 +194,38 @@ toggle = 1
 
 try:
   while(1):
-	current_sensor = 6
-	while (current_sensor<9):
-	  	time.sleep(1)
-  		sendAddress(current_sensor)
-  		print "ad " , current_sensor
-  		time.sleep(1)
-  		sendData(2)
-  		print "cmd 2"
-  		time.sleep(1)
-  		sensor_data['water_stress'] = listen()
-  		time.sleep(1)
-  		sendAddress(current_sensor)
-	  	print "ad ", current_sensor
-	  	time.sleep(1)
-  		sendData(3)
-  		print "cmd 3"
-  		time.sleep(1)
-  		sensor_data['temperature'] = listen()
-	  	(T,P) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
-  		(payload['temperature'],payload['water_stress']) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress']) 
-		print "temp = ",T,"pressure = ", P
-		if current_sensor == 6 :
-	        	# currently only one sensor available
-			client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
-		current_sensor+=1
+  	for i in range(3):
+	  	current_sensor =6
+		while (current_sensor<8):
+			time.sleep(1)
+			sendAddress(current_sensor)
+			print "ad " , current_sensor
+			time.sleep(1)
+			sendData(2)
+			print "cmd 2"
+			time.sleep(1)
+			sensor_data['water_stress'] = listen()
+			time.sleep(1)
+			sendAddress(current_sensor)
+			print "ad ", current_sensor
+			time.sleep(1)
+			sendData(3)
+			print "cmd 3"
+			time.sleep(1)
+			sensor_data['temperature'] = listen()
+			(T,P) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
+			(payload['prtR'],payload['brgSig']) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
+			print "temp = ",T,"pressure = ", P
+			if i == 2 :
+		 		if current_sensor == 6 :
+				# currently only one sensor available
+		    			client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+			  	if current_sensor == 7 :
+		    			client2.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+			current_sensor+=1
 
-  time.sleep(2)
+#	time.sleep(300)
+  time.sleep(300)
 #  time.sleep(1)
 #  sendAddress(6)
 #  print "ad 3"
