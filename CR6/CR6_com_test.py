@@ -11,7 +11,7 @@ import numpy as np
 import serial
 
 ser = serial.Serial(
-        port=r'/dev/ttyS0',
+        port='/dev/serial0',
         baudrate = 4800,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
@@ -19,10 +19,15 @@ ser = serial.Serial(
         timeout=1.0
 )
 
+
+payload = {}
 i=0
 while 1:
-    print(i)
-    i+=1
-    x=ser.readline()
-
-    print (x)
+    while ser.inWaiting():
+      x = ser.readline()
+      list =x.split(';')
+      print(list)
+      weight = list[1].split(',')
+      print(weight)
+      intweight = int(weight[0])
+      print(intweight)
