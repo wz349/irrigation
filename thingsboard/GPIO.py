@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 import json
 
-THINGSBOARD_HOST = '3.128.34.25'
+THINGSBOARD_HOST = '3.19.237.92'
 ACCESS_TOKEN = 'RASPBERRY_PI_DEMO_TOKEN'
 
 # We assume that all GPIOs are LOW
