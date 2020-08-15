@@ -12,6 +12,7 @@ import serial
 import paho.mqtt.client as mqtt
 import json
 import re
+import math
 from datetime import datetime
 
 THINGSBOARD_HOST = '3.19.237.92' # thingsboard server ip address
@@ -62,10 +63,22 @@ def readCR6(payload):
 	payload["RH"] = float(RH[0])
 	now = datetime.now()
 	payload["timestamp"] = (now-epoch).total_seconds() * 1000.0 
+	payload["VPDPa"] = calculateVPD(payload)
+
 def recordLocal(payload):
 	with open('weather_data.json','a') as outfile:
 		json.dump(payload,outfile)
 
+def calculateVPD(payload)
+    A=17.2693882; #Constant for calculating Psat in kPa
+    B=35.86; #Constant
+    C=0.61078; #Constant
+    airTKM = payload['RoomT']+273.15
+    airRHM = payload['RH']
+    Psat=C*math.exp(A*(airTKM-273.15)/(airTKM-B)); #kPa
+    VPDkPa=(100-airRHM)/100*Psat; #kPa                           
+    VPDPa=VPDkPa*10**3; #Pa
+	return VPDPa
 
 while 1:
 	try:
