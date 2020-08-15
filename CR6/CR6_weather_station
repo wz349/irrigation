@@ -48,10 +48,12 @@ while 1:
 				r = '\d+'
 				temp = re.findall(r,weight[1])
 				print(temp)
-      				intweight = int(temp[0])
-    				print(intweight)
-      				payload["weight"] = intweight
-				print(list[18],list[20],list[22],list[24])
+      				#intweight = int(temp[0])
+    				#print(intweight)
+      				#payload["weight"] = intweight
+				print(list[15],list[17],list[19],list[21],list[23])
+				PAR = list[16].split(',')
+				payload["PAR_weatherstation"]= float(PAR[0])
 				slrkW = list[18].split(',')
 				payload["solar intensity"]= float(slrkW[0])
 				windspeed = list[20].split(',')
@@ -65,4 +67,5 @@ while 1:
 					i = 0
 				
 	except:
+		time.sleep(60)
 		pass
