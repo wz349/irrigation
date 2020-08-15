@@ -45,16 +45,17 @@ def get_all_data_sensor():
         dic_data['timestamp']=date
         dic_data['BattV']=float(liste[2][:-1])
     #    dic_data['Ptemp_C']=float(liste[6][:-5])
-        dic_data['pin']=np.array(liste[5].split(","))[:7].astype(np.float)
-        dic_data['Resist']=np.array(liste[7].split(","))[:7].astype(np.float)
-        dic_data['FullBr']=np.array(liste[9].split(","))[:7].astype(np.float)
-        dic_data['Tsensor']=np.array(liste[11].split(","))[:7].astype(np.float)
-        dic_data['Psensor']=np.array(liste[13].split(","))[:7].astype(np.float)
+        dic_data['pin']=np.array(liste[5].split(","))[:7]
+        dic_data['Resist']=np.array(liste[7].split(","))[:7]
+        dic_data['FullBr']=np.array(liste[9].split(","))[:7]
+        dic_data['Tsensor']=np.array(liste[11].split(","))[:7]
+        dic_data['Psensor']=np.array(liste[13].split(","))[:7]
         dic_data['PAR']=float(liste[15].split(',')[0])
         dic_data['SlrkW']=float(liste[17].split(',')[0])
         dic_data['Windspeed']=float(liste[19].split(',')[0])
         dic_data['roomT']=float(liste[21].split(',')[0])
         dic_data['roomRH']=float(liste[23].split(',')[0])
+	print(dic_data)
         Te=dic_data['roomT']
         RH= dic_data['roomRH']
         SVD = 5.018+0.32321*Te+8.1847e-3*Te**2+3.1243e-4*Te**3
@@ -63,9 +64,10 @@ def get_all_data_sensor():
         return(True,dic_data)
 #    return(pin,Resist,FullBr)
 
-
     
 def update_WP_sensor(pin):
     return([-1,-1])
 
 
+
+get_all_data_sensor()

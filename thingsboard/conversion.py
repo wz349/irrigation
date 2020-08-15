@@ -146,7 +146,7 @@ def adcConversion(refV,prtVal,brgVal):
     prtV = ((float)(prtVal-refVal))/refVal*5
     brgRefV = 5*2347.0/(22000.0+2347.1)
     brgV = ((float)(brgVal-refVal))/refVal*5/128  # the bridge signal is amplified by 128
-    brgSig = brgV/brgRefV*1000  # brgSig measured in ratio * 1000
+    brgSig = brgV/brgRefV*1000*100  # brgSig measured in ratio * 1000
     print "prtV=",prtV, "brgV=",brgV, "brgRefV=" ,brgRefV, "brgSig=" ,brgSig
 
     # convert voltage to R
