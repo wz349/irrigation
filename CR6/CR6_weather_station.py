@@ -63,22 +63,22 @@ def readCR6(payload):
 	payload["RH"] = float(RH[0])
 	now = datetime.now()
 	payload["timestamp"] = (now-epoch).total_seconds() * 1000.0 
-	payload["VPDPa"] = calculateVPD(payload)
+	payload["VPDkPa"] = calculateVPD(payload)
 
 def recordLocal(payload):
 	with open('weather_data.json','a') as outfile:
 		json.dump(payload,outfile)
 
 def calculateVPD(payload)
-    A=17.2693882; #Constant for calculating Psat in kPa
-    B=35.86; #Constant
-    C=0.61078; #Constant
-    airTKM = payload['RoomT']+273.15
-    airRHM = payload['RH']
-    Psat=C*math.exp(A*(airTKM-273.15)/(airTKM-B)); #kPa
-    VPDkPa=(100-airRHM)/100*Psat; #kPa                           
-    VPDPa=VPDkPa*10**3; #Pa
-	return VPDPa
+	A=17.2693882; #Constant for calculating Psat in kPa
+	B=35.86; #Constant
+	C=0.61078; #Constant
+	airTKM = payload['RoomT']+273.15
+	airRHM = payload['RH']
+	Psat=C*math.exp(A*(airTKkM-273.15)/(airTKM-B)) #kPa
+	VPDkPa=(100-airRHM)/100*Psat #kPa                           
+	VPDPa=VPDkPa*10**3 #Pa
+	return VPDkPa
 
 while 1:
 	try:
