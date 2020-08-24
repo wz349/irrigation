@@ -15,7 +15,7 @@ import re
 from datetime import datetime
 
 ser = serial.Serial(
-		port='/dev/serial0',
+		port='/dev/ttyUSB0',
 		baudrate = 4800,
 		parity=serial.PARITY_NONE,
 		stopbits=serial.STOPBITS_ONE,
@@ -50,10 +50,13 @@ def readCR6(payload):
 	print(floatsoil)
 	payload["SoilSensor1"] = float(soil[0])
 	payload["SoilSensor2"] = float(soil[1])
+	payload["SoilSensor3"] = float(soil[2])
 	payload["SoilSensor4"] = float(soil[3])
 	payload["SoilSensor5"] = float(soil[4])
+	payload["SoilSensor6"] = float(soil[5])
 	payload["SoilSensor7"] = float(soil[6])
 	payload["SoilSensor8"] = float(soil[7])
+	payload["SoilSensor9"] = float(soil[8])
 	payload["SoilSensor10"] = float(soil[9])
 	payload["SoilSensor11"] = float(soil[10])
 	temp = list[4].split(',')
@@ -80,13 +83,13 @@ try:
 				readCR6(payload)
 				recordLocal(payload)
 				client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+
 		except:
 			with open('error.log','a') as errorlog:
 				now = datetime.now()
 				errorlog.write(str((now-epoch).total_seconds() * 1000.0))
 				errorlog.write('error occured \n')
-
-			time.sleep(60)
+			time.sleep(5)
 			pass
 
 except KeyboardInterrupt:
