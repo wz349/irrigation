@@ -6,11 +6,15 @@ import requests
 import paho.mqtt.client as mqtt
 import json
 
+# test function. No usage in real collection
+
 def blink():
 	GPIO.output(14,1)
 	time.sleep(.5)
 	GPIO.output(14,0)
 	time.sleep(.5)
+
+#  Address and data and different fromat. Mainly to accomendate data that is longer than 1 byte
 
 def sendAddress(a):
   GPIO.output(4,GPIO.HIGH)
@@ -38,6 +42,8 @@ def sendData(d):
     else:
         ser.write(chr(d))
 
+# Passive mode to listen to the bus. return a integer “data”
+
 def listen():
     # decide if the transmitted address is the same as this machines ADDRESS
     GPIO.output(4, GPIO.LOW)
@@ -55,7 +61,7 @@ def listen():
                   while(1):
                       if(ser.in_waiting > 0):
                           data = ord(ser.read(1))
-  			  print "Input: ", bin(data)
+          print "Input: ", bin(data)
   							# if another address is transmitted than stop listening
                           if(data >> 7):
                               break
@@ -99,6 +105,9 @@ def listen():
 
 
 # define serial parameters
+# use seiral0 --> for UART at GPIO
+# use ttyUSB0, ttyUSB1 --> for connection through serial to usb dongles
+
 port = "/dev/serial0"
 #port = "/dev/ttyACM0"
 ser = serial.Serial(port, 9600)
@@ -136,23 +145,24 @@ client2.loop_start()
 
 
 
-# adc converion function
+# adc converion function input: 5(reference voltage), raw prtVal, raw brgVal
 
 def adcConversion(refV,prtVal,brgVal):
 
     # convert adcVal to voltage
 
-    refVal = 2**14                      # adc reading when 0 Volts is measured
+    refVal = 2**14                                  # adc reading when 0 Volts is measured
     prtV = ((float)(prtVal-refVal))/refVal*5
-    brgRefV = 5*2347.0/(22000.0+2347.1)
-    brgV = ((float)(brgVal-refVal))/refVal*5/128  # the bridge signal is amplified by 128
-    brgSig = brgV/brgRefV*1000*100  # brgSig measured in ratio * 1000
+    brgRefV = 5*2347.0/(22000.0+2347.1)             # will change later to account for varies in reference R
+    brgV = ((float)(brgVal-refVal))/refVal*5/128    # the bridge signal is amplified by 128
+    brgSig = brgV/brgRefV*1000*100                  # brgSig measured in ratio * 1000
     print "prtV=",prtV, "brgV=",brgV, "brgRefV=" ,brgRefV, "brgSig=" ,brgSig
 
     # convert voltage to R
     resRef = 22000
     prtR = ((float)(resRef*prtV))/(5-prtV)
     print "prtR=" ,prtR
+
     # coefficients
     bp     = 64.68
     mp     = -29.448
@@ -178,7 +188,7 @@ def adcConversion(refV,prtVal,brgVal):
     # Calculate P
     P = mp*(brgSig-voT) + bp
 
-    return(prtR,brgSig)
+    return(prtR,brgSig)                             # return resistance and bridge signal for now, can switch to pressure and temperature.
 
 
 
@@ -195,79 +205,42 @@ toggle = 1
 try:
   while(1):
   	for i in range(3):
-	  	current_sensor =6
-		while (current_sensor<8):
-			time.sleep(1)
-			sendAddress(current_sensor)
-			print "ad " , current_sensor
-			time.sleep(1)
-			sendData(2)
-			print "cmd 2"
-			time.sleep(1)
-			sensor_data['water_stress'] = listen()
-			time.sleep(1)
-			sendAddress(current_sensor)
-			print "ad ", current_sensor
-			time.sleep(1)
-			sendData(3)
-			print "cmd 3"
-			time.sleep(1)
-			sensor_data['temperature'] = listen()
-			(T,P) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
-			(payload['prtR'],payload['brgSig']) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
-			print "temp = ",T,"pressure = ", P
-			if i == 2 :
-		 		if current_sensor == 6 :
-				# currently only one sensor available
-		    			client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
-			  	if current_sensor == 7 :
-		    			client2.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
-			current_sensor+=1
-
-#	time.sleep(300)
-  time.sleep(300)
-#  time.sleep(1)
-#  sendAddress(6)
-#  print "ad 3"
-#  time.sleep(1)
-#  sendData(2)
-#  print "cmd 2"
-#  time.sleep(1)
-#  listen()
-#  time.sleep(1)
-#  sendAddress(6)
-#  print "ad 3"
-#  time.sleep(1)
-#  sendData(3)
-#  print "cmd 3"
-#  time.sleep(1)
-#  listen()
-  
-  '''while True:
-    if(role == 1):
-      time.sleep(1)
-      sendAddress(6)
-      print "sent ad 6"
-      time.sleep(1)
-      if(toggle):
-        sendData(3)
-        print "sent 3"
-      else:
+      # reduce the frequency of uploading data to the cloud but keep a higher frequency to record data locally.
+	  	current_sensor =6 # address of datalogger
+      while (current_sensor<8):
+        time.sleep(1)
+        sendAddress(current_sensor)
+        print "ad " , current_sensor
+        time.sleep(1)
         sendData(2)
-        print "sent 2"
-      toggle = not toggle
-      time.sleep(1)
-      role = 0
-    else:
-      role = 1
-      listen()
-      print "done"
-      #time.sleep(2)'''
+        print "cmd 2"
+        time.sleep(1)
+        sensor_data['water_stress'] = listen()
+        time.sleep(1)
+        sendAddress(current_sensor)
+        print "ad ", current_sensor
+        time.sleep(1)
+        sendData(3)
+        print "cmd 3"
+        time.sleep(1)
+        sensor_data['temperature'] = listen()
+        (T,P) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
+        (payload['prtR'],payload['brgSig']) = adcConversion(5,sensor_data['temperature'],sensor_data['water_stress'])
+        print "temp = ",T,"pressure = ", P
+        if i == 2 :
+          if current_sensor == 6 :
+          # currently only one sensor available
+                client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+            if current_sensor == 7 :
+                client2.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+        current_sensor+=1
+
+  time.sleep(300)
 
 except KeyboardInterrupt:
-	GPIO.cleanup()
-        client.loop_stop()
-        client.disconnect()
-        f.close()
+GPIO.cleanup()
+client.loop_stop()
+client.disconnect()
+f.close()
 GPIO.cleanup()
 

@@ -15,8 +15,17 @@ import re
 import math
 from datetime import datetime
 
+
 THINGSBOARD_HOST = '3.19.237.92' # thingsboard server ip address
 ACCESS_TOKEN  = 'WjTy34T0DNH8gcNKmE1O'	# thingsboard device access_token
+client = mqtt.Client()
+client.username_pw_set(ACCESS_TOKEN) 
+client.connect(THINGSBOARD_HOST, 1883, 60) # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
+client.loop_start()
+
+# define serial parameters
+# use seiral0 --> for UART at GPIO
+# use ttyUSB0, ttyUSB1 --> for connection through serial to usb dongles
 
 ser = serial.Serial(
 		port='/dev/serial0',  # UART through GPIO pins
@@ -33,10 +42,8 @@ i=0
 
 epoch = datetime.utcfromtimestamp(0)
 
-client = mqtt.Client()
-client.username_pw_set(ACCESS_TOKEN) 
-client.connect(THINGSBOARD_HOST, 1883, 60) # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
-client.loop_start()
+
+# this function read the output from CR6 and disect it into different value
 
 def readCR6(payload):
 	x = ser.readline()
@@ -65,9 +72,13 @@ def readCR6(payload):
 	payload["timestamp"] = (now-epoch).total_seconds() * 1000.0 
 	payload["VPDkPa"] = calculateVPD(payload)
 
+# this function locally store data that is collected from CR6
+
 def recordLocal(payload):
 	with open('weather_data.json','a') as outfile:
 		json.dump(payload,outfile)
+
+# This function use Room Temperature and Relative Humidity to calculate VPD
 
 def calculateVPD(payload):
 	A=17.2693882 #Constant for calculating Psat in kPa
@@ -80,6 +91,8 @@ def calculateVPD(payload):
 	#VPDPa=VPDkPa*10**3 #Pa
 	return VPDkPa
 
+# main funciton
+
 while 1:
 	try:
 		while 1:
@@ -87,11 +100,12 @@ while 1:
 				i+=1
 				readCR6(payload)
 				recordLocal(payload)
-				if i == 1 :
+				if i == 1 :   # set this number higher if there is need to reduce frequency of uploading data to the cloud
 					client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
-				i = 0
+					i = 0
 				
 	except:
+		# instead of crashing the function, record error and try again(need to make specific error message later)
 		time.sleep(60)
 		with open('error.log','a') as errorlog:
 			now = datetime.now()

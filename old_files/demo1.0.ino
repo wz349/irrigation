@@ -5,6 +5,7 @@ const int dataReadyPin = 6;
 const int ampLvlPin = 4;
 const int chanSelPin = 2;
 const int rsEnablePin = 9;
+const int adcExcitation  = 5;
 long byte1;
 long byte2;
 byte byte3;
@@ -36,14 +37,15 @@ void setup() {
   delay(10);
   digitalWrite(rsEnablePin, LOW);
 
-    pinMode(chipSelectPin,OUTPUT);
+  pinMode(chipSelectPin,OUTPUT);
   pinMode(dataReadyPin,INPUT);
   pinMode(ampLvlPin,OUTPUT);
   pinMode(chanSelPin,OUTPUT);
-    digitalWrite(chipSelectPin,LOW);
+  pinMode(adcExcitation,OUTPUT);
+  digitalWrite(chipSelectPin,LOW);
   digitalWrite(ampLvlPin,LOW);   //default amplification level = 1
   digitalWrite(chanSelPin,HIGH); //default channel = ain3&4 (for test)
-
+  digitalWrite(adcExcitation,LOW);
   
   SPI.begin();
 
@@ -180,6 +182,7 @@ long getAdcReading(int channel) {
   long value = 0 ;
   SPI.beginTransaction(mySettting);
   //digitalWrite(chipSelectPin,LOW);
+  digitalWrite(adcExcitation,HIGH);
 
   // a little delay for ad7191 to be ready (from datasheet)
   __asm__("nop\n\t");
@@ -195,7 +198,7 @@ long getAdcReading(int channel) {
 
   //digitalWrite(chipSelectPin,HIGH);
   SPI.endTransaction();
-
+  digitalWrite(adcExcitation,LOW);
   
   value = byte1*256+byte2;  
   return value;

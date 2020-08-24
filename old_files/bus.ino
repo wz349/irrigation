@@ -8,12 +8,12 @@ BME280 bme280;
   #define ADDRESS 7
 byte sbufferA [1];
 byte sbufferD [1];
-  int more = false;
-  int last = true;
-  int i = 0;
-  int buffer = 0;
-  int role = 0;
-  unsigned long timeout = 5;
+int more = false;
+int last = true;
+int i = 0;
+int buffer = 0;
+int role = 0;
+unsigned long timeout = 5;
 long prt = 32766;
 long bridge = 600;
 int readCMD = 0;
