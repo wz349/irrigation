@@ -20,7 +20,7 @@ from datetime import datetime
 
 
 ser = serial.Serial(
-		port='/dev/serial0',
+		port='/dev/ttyUSB1',
 		baudrate = 4800,
 		parity=serial.PARITY_NONE,
 		stopbits=serial.STOPBITS_ONE,
@@ -44,15 +44,16 @@ payload = {}
 i=0
 epoch = datetime.utcfromtimestamp(0)
 
-#Coeff for sensor1 
 
-COEFF_MP1 = -47.31956
-COEFF_BP1 = 252.593
-COEFF_OFFSET1 = 4.83
-COEFF_BT1 = -333.6849448
-COEFF_MT1 = 0.2367422265
-COEFF_BPT1 = 5.555694
-COEFF_MPT1 = -0.00636919
+#Coeff for sensor1   T2_W2_90
+
+COEFF_MP1 = -30.130244396
+COEFF_BP1 = 143.12682466 - 142.874
+COEFF_OFFSET1 = 4.76
+COEFF_BT1 = -293.20967885
+COEFF_MT1 = 0.1846895356
+COEFF_BPT1 = 4.89386809187
+COEFF_MPT1 = -0.0056113821
 
 #Coeff for sensor2  
 
@@ -66,7 +67,7 @@ COEFF_MPT2 = -0.00636919
 
 
 
-#Coeff for sensor3  
+#Coeff for sensor3   T3_V_68
 
 COEFF_MP3 = -47.31956
 COEFF_BP3 = 252.593
@@ -76,21 +77,19 @@ COEFF_MT3 = 0.2367422265
 COEFF_BPT3 = 5.555694
 COEFF_MPT3 = -0.00636919
 
-#Coeff for sensor4  
+#Coeff for sensor4  T4_W1_80
+COEFF_MP4 = -30.50142937
+COEFF_BP4 = 63.123776039
+COEFF_OFFSET4 = 2.115
+COEFF_BT4 = -338.83448
+COEFF_MT4 = 0.227461627
+COEFF_BPT4 = 2.1455706
+COEFF_MPT4 = -0.00684126016
 
-COEFF_MP4 = -47.31956
-COEFF_BP4 = 252.593
-COEFF_OFFSET4 = 4.83
-COEFF_BT4 = -333.6849448
-COEFF_MT4 = 0.2367422265
-COEFF_BPT4 = 5.555694
-COEFF_MPT4 = -0.00636919
-
-# Coeff for sensor5
-
+# Coeff for sensor5  T2_W1_82
 COEFF_MP5 = -47.31956
 COEFF_BP5 = 252.593
-COEFF_OFFSET5 = 4.83
+COEFF_OFFSET5 = 5.85
 COEFF_BT5 =  -296.2587
 COEFF_MT5 = 0.2010998
 COEFF_BPT5 = 5.555694
@@ -129,11 +128,13 @@ def readCR6(payload):
 	#payload["water_stress_test3"] = (float(br1[4])-COEFF_OFFSET)*COEFF_MP
 	
 	print("cp.5")
-	payload["w_s1"] =(float(br1[0])- ((payload["temperature1"])*COEFF_MPT1 + COEFF_BPT1))*COEFF_MP1 + COEFF_BP1
-	payload["w_s2"] =(float(br1[1])- ((payload["temperature2"])*COEFF_MPT2 + COEFF_BPT2))*COEFF_MP2 + COEFF_BP2
+	payload["w_s1"] =(float(br1[0])- ((payload["temperature3"])*COEFF_MPT1 + COEFF_BPT1))*COEFF_MP1 + COEFF_BP1
+	payload["w_s2"] =(float(br1[1])- ((payload["temperature3"])*COEFF_MPT2 + COEFF_BPT2))*COEFF_MP2 + COEFF_BP2
 	payload["w_s3"] =(float(br1[2])- ((payload["temperature3"])*COEFF_MPT3 + COEFF_BPT3))*COEFF_MP3 + COEFF_BP3
 	payload["w_s4"] =(float(br1[3])- ((payload["temperature4"])*COEFF_MPT4 + COEFF_BPT4))*COEFF_MP4 + COEFF_BP4
 	payload["w_s5"] =(float(br1[4])- ((payload["temperature5"])*COEFF_MPT5 + COEFF_BPT5))*COEFF_MP5 + COEFF_BP5
+	now = datetime.now()
+	payload["timestamp"] = (now-epoch).total_seconds() * 1000.0
 	print("cp1")
 
 # this function locally store data that is collected from CR6
@@ -141,18 +142,21 @@ def readCR6(payload):
 def recordLocal(payload):
 	with open('sensor_data.json','a') as outfile:
 		json.dump(payload,outfile)
-
+i = 0
 
 try:
 	while 1:
 		try:
 			while ser.inWaiting():
+				i+=1
 				readCR6(payload)
 				recordLocal(payload)
 				print("cp2")
-				for i in range(4):
-					if i == 3 :
-						client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+				if i == 4 :
+					client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+					print('publish')
+					print(i)
+					i = 0
 				print("cp3")
 
 		except:
