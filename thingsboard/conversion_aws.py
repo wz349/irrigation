@@ -99,7 +99,7 @@ def listen():
 
 
 # define serial parameters
-port = "/dev/serial0"
+port = "/dev/ttyUSB0"
 #port = "/dev/ttyACM0"
 ser = serial.Serial(port, 9600)
 
@@ -114,7 +114,7 @@ f = open("input.csv","a+")
 #API_KEY = "9VY9ICR776NZBLM8"
 
 # thingsboard stuff
-THINGSBOARD_HOST = '3.128.34.25'
+THINGSBOARD_HOST = '3.19.237.92'
 ACCESS_TOKEN  = 'H7A7h79eenFkKWApFY4B'
 ACCESS_TOKEN2 = 'U2eO2SUSixY2dLHrWo1q'
 
@@ -144,9 +144,9 @@ def adcConversion(refV,prtVal,brgVal):
 
     refVal = 2**14                      # adc reading when 0 Volts is measured
     prtV = ((float)(prtVal-refVal))/refVal*5
-    brgRefV = 5*2347.0/(22000.0+2347.1)
+    brgRefV = 5*1280.0/(22000.0+1280.1)
     brgV = ((float)(brgVal-refVal))/refVal*5/128  # the bridge signal is amplified by 128
-    brgSig = brgV/brgRefV*1000*100  # brgSig measured in ratio * 1000
+    brgSig = brgV/brgRefV*1000  # brgSig measured in ratio * 1000
     print "prtV=",prtV, "brgV=",brgV, "brgRefV=" ,brgRefV, "brgSig=" ,brgSig
 
     # convert voltage to R
@@ -195,7 +195,7 @@ toggle = 1
 try:
   while(1):
   	for i in range(3):
-	  	current_sensor =6
+	  	current_sensor =7
 		while (current_sensor<8):
 			time.sleep(1)
 			sendAddress(current_sensor)
