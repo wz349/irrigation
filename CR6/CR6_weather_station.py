@@ -102,8 +102,8 @@ while 1:
 				recordLocal(payload)
 				if i == 1 :   # set this number higher if there is need to reduce frequency of uploading data to the cloud
 					client.publish('v1/devices/me/telemetry', json.dumps(payload), 1)
+
 					i = 0
-				
 	except:
 		# instead of crashing the function, record error and try again(need to make specific error message later)
 		time.sleep(60)

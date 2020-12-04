@@ -11,7 +11,7 @@ from datetime import datetime
 VALVE1_FLOWRATE = 0.165
 VALVE2_FLOWRATE = 0.1
 VALVE3_FLOWRATE = 0.165
-VALVE4_FLOWRATE = 0.175
+VALVE4_FLOWRATE = 0.170
 
 # Goal volume of water irrigation
 
