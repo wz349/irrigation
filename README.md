@@ -12,5 +12,5 @@ Files:
 
 /CR6/CR6_weather_station.py : Communicating with CR6 that was connected to weater station,  uploading to thingsboard.
 
-/thingsboard/GPIO.py  : Coordinate with thingsboard gadget to control GPIO pins on PI remotely. Used to control valves this summer.
+/thingsboard/valve_control.py  : Coordinate with thingsboard gadget to control GPIO pins on PI remotely. Used to control valves this summer.
 

@@ -1,0 +1,2 @@
+OUTFILE = "token.tk"
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"username":"tenant@thingsboard.org", "password":"tenant"}' 'http://3.19.237.92:8080/api/auth/login' >> token.tk
